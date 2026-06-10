@@ -9,6 +9,9 @@ import { Upload, Dog, RefreshCw, CheckCircle2, AlertCircle, Camera, Sparkles, X,
 import Markdown from 'react-markdown';
 import { classifyDogBreed, ClassificationResult } from './services/classifier';
 import learningCurvesImg from './images/krzywe_uczenia_convnext_finetuned.png';
+import i18nData from './i18n.json';
+
+type Language = 'pl' | 'en';
 
 const BREEDS = [
   'Chihuahua', 'Japanese Spaniel', 'Maltese Dog', 'Pekinese', 'Tzu', 'Blenheim Spaniel', 'Papillon', 'Toy Terrier', 
@@ -32,6 +35,7 @@ const BREEDS = [
 ];
 
 export default function App() {
+  const [lang, setLang] = useState<Language>('pl');
   const [image, setImage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -49,16 +53,38 @@ export default function App() {
   // Current view/page state
   const [page, setPage] = useState<'home' | 'info'>('home');
 
+  const t = (key: keyof typeof i18nData.pl): string => {
+    return (i18nData[lang] as Record<string, string>)[key] || '';
+  };
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    if (result && result.breed) {
+      fetchBreedDescription(result.breed, newLang);
+    }
+  };
+
   const handleLogoClick = () => {
     reset();
     setPage('home');
+  };
+
+  const handleGoToBreedsList = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setPage('info');
+    setTimeout(() => {
+      const element = document.getElementById('recognized-breeds');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (!selectedFile.type.startsWith('image/')) {
-        setError('Proszę wybrać plik graficzny.');
+        setError(t('error_only_image'));
         return;
       }
       processFile(selectedFile);
@@ -84,7 +110,7 @@ export default function App() {
     }
   }, []);
 
-  const fetchBreedDescription = async (breedName: string) => {
+  const fetchBreedDescription = async (breedName: string, selectedLang: Language = lang) => {
     setIsGeneratingDesc(true);
     setDescError(null);
     setAiDescription(null);
@@ -92,17 +118,17 @@ export default function App() {
       const response = await fetch("/api/description", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ breed: breedName })
+        body: JSON.stringify({ breed: breedName, lang: selectedLang })
       });
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.error || errData.detail || "Nie udało się pobrać opisu rasy.");
+        throw new Error(errData.error || errData.detail || (selectedLang === 'en' ? "Failed to download breed description." : "Nie udało się pobrać opisu rasy."));
       }
       const data = await response.json();
       setAiDescription(data.description);
     } catch (err) {
       console.error(err);
-      setDescError(err instanceof Error ? err.message : 'Błąd podczas generowania opisu przez Gemini.');
+      setDescError(err instanceof Error ? err.message : (selectedLang === 'en' ? 'Error generating breed description via Gemini.' : 'Błąd podczas generowania opisu przez Gemini.'));
     } finally {
       setIsGeneratingDesc(false);
     }
@@ -120,10 +146,10 @@ export default function App() {
       const res = await classifyDogBreed(image);
       setResult(res);
       if (res.breed) {
-        fetchBreedDescription(res.breed);
+        fetchBreedDescription(res.breed, lang);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Wystąpił nieoczekiwany błąd.');
+      setError(err instanceof Error ? err.message : t('error_unexpected'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -150,7 +176,35 @@ export default function App() {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-white group-hover:opacity-90 transition-opacity">DogBreed AI</h1>
           </div>
-          <div className="text-sm">
+          <div className="flex items-center gap-4 text-sm">
+            {/* Przełącznik Języka / Language switcher */}
+            <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/10">
+              <button 
+                onClick={() => handleLanguageChange('pl')} 
+                className={`p-1.5 px-2.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                  lang === 'pl' 
+                    ? 'bg-[#3dcf10] text-white shadow-sm font-bold' 
+                    : 'hover:bg-white/5 text-white/70 hover:text-white'
+                }`}
+                title="Polska wersja"
+              >
+                <span className="text-sm select-none">🇵🇱</span>
+                <span className="text-[10px] font-bold">PL</span>
+              </button>
+              <button 
+                onClick={() => handleLanguageChange('en')} 
+                className={`p-1.5 px-2.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                  lang === 'en' 
+                    ? 'bg-[#3dcf10] text-white shadow-sm font-bold' 
+                    : 'hover:bg-white/5 text-white/70 hover:text-white'
+                }`}
+                title="English version"
+              >
+                <span className="text-sm select-none">🇬🇧</span>
+                <span className="text-[10px] font-bold">EN</span>
+              </button>
+            </div>
+
             <button
               onClick={() => setPage(page === 'home' ? 'info' : 'home')}
               className={`hover:text-white transition-all cursor-pointer text-sm font-semibold border px-4 py-2 rounded-xl active:scale-95 ${
@@ -159,7 +213,7 @@ export default function App() {
                   : 'bg-transparent border-[#ffe3c3]/30 text-[#ffe3c3] hover:border-[#ffe3c3]/80 hover:bg-[#ffe3c3]/5'
               }`}
             >
-              Dowiedz się więcej
+              {t('learn_more')}
             </button>
           </div>
         </div>
@@ -181,7 +235,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
               >
-                Sprawdź rasę swojego psa
+                {t('hero_title')}
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -189,7 +243,7 @@ export default function App() {
                 transition={{ delay: 0.1 }}
                 className="text-lg theme-text-muted max-w-xl mx-auto"
               >
-                Wgraj zdjęcie, a nasza sztuczna inteligencja zidentyfikuje rasę i poda najważniejsze cechy Twojego pupila.
+                {t('hero_subtitle')}
               </motion.p>
             </header>
 
@@ -216,8 +270,8 @@ export default function App() {
                         <Upload size={32} className="transition-colors" />
                       </div>
                       <div>
-                        <p className="text-xl font-semibold mb-1 text-white">Upuść zdjęcie tutaj</p>
-                        <p className="theme-text-muted">lub kliknij, aby wybrać plik z komputera</p>
+                        <p className="text-xl font-semibold mb-1 text-white">{t('drop_title')}</p>
+                        <p className="theme-text-muted">{t('drop_subtitle')}</p>
                       </div>
                       <div className="mt-4 flex gap-8 text-xs theme-text-muted">
                         <div className="flex items-center gap-1"><Camera size={14} /> JPG, PNG</div>
@@ -261,12 +315,12 @@ export default function App() {
                             {isAnalyzing ? (
                               <>
                                 <RefreshCw size={24} className="animate-spin" />
-                                Analizowanie zdjęcia...
+                                {t('btn_analyzing')}
                               </>
                             ) : (
                               <>
                                 <RefreshCw size={24} />
-                                Rozpoznaj rasę
+                                {t('btn_identify')}
                               </>
                             )}
                           </button>
@@ -274,7 +328,7 @@ export default function App() {
                             onClick={reset} 
                             className="text-sm theme-text-muted hover:theme-text-main transition-colors underline underline-offset-4"
                           >
-                            Wybierz inne zdjęcie
+                            {t('btn_choose_another')}
                           </button>
                         </div>
                       ) : (
@@ -285,13 +339,13 @@ export default function App() {
                         >
                           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b theme-border pb-6">
                             <div>
-                              <p className="text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">Prawdopodobna Rasa</p>
+                              <p className="text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">{t('likely_breed')}</p>
                               <h3 className="text-4xl font-black theme-text-main leading-tight">
                                 {result.breed}
                               </h3>
                             </div>
                             <div className="flex flex-col md:items-end">
-                              <p className="text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">Confidence</p>
+                              <p className="text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">{t('confidence')}</p>
                               <div className="flex items-center gap-2">
                                  <div className="text-3xl font-mono theme-accent-text font-bold">
                                    {result.confidence}%
@@ -316,7 +370,7 @@ export default function App() {
                             >
                               <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
                               <div className="text-sm leading-relaxed pr-8 font-medium">
-                                Uwaga, confidence level spadł poniżej 75%, może to oznaczać że nasz model błędnie zaklasyfikował twojego pupila, wskazując inną, podobną wizualnie rasę.
+                                {t('warning_confidence')}
                               </div>
                               <button
                                 onClick={() => setShowWarning(false)}
@@ -334,13 +388,13 @@ export default function App() {
                               <div className="w-10 h-10 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center border border-gray-200/80 shadow-sm shrink-0">
                                 <Sparkles size={20} />
                               </div>
-                              <h4 className="text-sm font-bold uppercase tracking-wider theme-text-muted">Ciekawostki i Opis Rasy (Gemini AI)</h4>
+                              <h4 className="text-sm font-bold uppercase tracking-wider theme-text-muted">{t('fun_facts_header')}</h4>
                             </div>
 
                             {isGeneratingDesc && (
                               <div className="flex flex-col items-center justify-center py-6 gap-3">
                                 <RefreshCw size={20} className="animate-spin theme-accent-text" />
-                                <p className="text-sm theme-text-muted animate-pulse">Generowanie opisu rasy przez sztuczną inteligencję...</p>
+                                <p className="text-sm theme-text-muted animate-pulse">{t('generating_desc')}</p>
                               </div>
                             )}
 
@@ -348,14 +402,14 @@ export default function App() {
                               <div className="p-4 bg-amber-50/75 text-amber-800 rounded-2xl border border-amber-100 space-y-2">
                                 <div className="flex items-center gap-2 font-semibold text-sm">
                                   <AlertCircle size={16} />
-                                  <span>Opis rasy jest tymczasowo niedostępny</span>
+                                  <span>{t('desc_unavailable')}</span>
                                 </div>
                                 <p className="text-xs opacity-90">{descError}</p>
                                 <button
                                   onClick={() => result && fetchBreedDescription(result.breed)}
                                   className="mt-2 text-xs font-bold underline cursor-pointer hover:opacity-80 transition-opacity"
                                 >
-                                  Spróbuj ponownie
+                                  {t('btn_try_again')}
                                 </button>
                               </div>
                             )}
@@ -379,7 +433,7 @@ export default function App() {
                               onClick={reset}
                               className="w-full py-4 theme-btn-secondary font-bold rounded-2xl flex items-center justify-center gap-2"
                             >
-                              Zacznij od nowa
+                              {t('btn_start_over')}
                             </button>
                           </div>
                         </motion.div>
@@ -394,22 +448,21 @@ export default function App() {
             <section className="mt-20 border-t theme-border pt-12 pb-12">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
                 <div>
-                  <h5 className="font-bold mb-3">Jak to działa?</h5>
+                  <h5 className="font-bold mb-3">{t('col1_title')}</h5>
                   <p className="text-sm theme-text-muted leading-relaxed">
-                    Nasz system wykorzystuje zaawansowany model splotowy (ConvNext) trenowany na ponad 20.000 zdjęć psów, aby zapewnić najwyższą precyzję rozpoznawania.
+                    {t('col1_text')}
                   </p>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3">120 Ras</h5>
+                  <h5 className="font-bold mb-3">{t('col2_title')}</h5>
                   <p className="text-sm theme-text-muted leading-relaxed">
-                    Nasz model jest w stanie rozpoznać 120 różnych ras psów, od popularnych po te bardziej egzotyczne. Jeżeli rasy twojego psa nie ma w naszej bazie,
-                    model wskaże rasę którą uzna za najbardziej podobną, a wskaźnik confidence odpowiednio się obniży.
+                    {t('col2_text_before_btn')}<button onClick={handleGoToBreedsList} className="text-[#3dcf10] hover:text-[#058810] font-bold underline transition-colors cursor-pointer bg-transparent border-none p-0 inline">{t('learn_more')}</button>
                   </p>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3">Prywatność</h5>
+                  <h5 className="font-bold mb-3">{t('col3_title')}</h5>
                   <p className="text-sm theme-text-muted leading-relaxed">
-                    Twoje zdjęcia są przesyłane bezpiecznie i wykorzystywane wyłącznie do celów klasyfikacji. Nie przechowujemy Twoich prywatnych danych.
+                    {t('col3_text')}
                   </p>
                 </div>
               </div>
@@ -429,16 +482,16 @@ export default function App() {
               onClick={() => setPage('home')}
               className="mb-8 flex items-center gap-2 text-sm text-[#794400] hover:opacity-85 transition-opacity font-bold cursor-pointer"
             >
-              <ArrowLeft size={16} /> Powrót do klasyfikacji
+              <ArrowLeft size={16} /> {t('back_to_classification')}
             </button>
 
             {/* Hero Sekcja w tym samym stylu */}
             <header className="mb-12 text-center">
               <span className="text-xs uppercase tracking-widest text-[#794400] bg-[#794400]/10 px-3 py-1 rounded-full font-extrabold mb-3 inline-block">
-                Specyfikacja i Szczegóły
+                {t('info_head_badge')}
               </span>
               <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#111827]">
-                O DogBreed AI
+                {t('info_head_title')}
               </h2>
             </header>
 
@@ -449,9 +502,9 @@ export default function App() {
                   <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
                     <Cpu size={24} />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">Architektura ConvNeXt</h3>
+                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card1_title')}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    Wykorzystujemy architekturę <strong>ConvNeXt-Tiny</strong>, nowoczesną interpretację sieci splotowych (CNN), która ucieleśnia najlepsze cechy technologiczne wizyjnych transformerów (ViT). Posiada ona powiększone filtry splotowe (7x7) oraz odwróconą strukturę bottlenecku, gwarantując najwyższą dokładność detekcji wizualnej.
+                    {t('card1_text')}
                   </p>
                 </div>
               </div>
@@ -461,9 +514,9 @@ export default function App() {
                   <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
                     <Layers size={24} />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">Zbiór 20,000+ Zdjęć</h3>
+                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card2_title')}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    Trening sieci został przeprowadzony metodą transfer learningu z wykorzystaniem zbioru <em>Stanford Dogs</em>.. Model doskonale dostrzega różnice ułożenia uszu, oczu i pyska nawet przy słabym oświetleniu.
+                    {t('card2_text')}
                   </p>
                 </div>
               </div>
@@ -473,9 +526,9 @@ export default function App() {
                   <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
                     <Award size={24} />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">Confidence & Dokładność</h3>
+                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card3_title')}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    Wskaźnik pewności (Confidence Level) informuje o podobieństwie do badanych wzorców rasy. Podczas treningu nasz model osiągnął imponującą dokładność na zbiorze walidacyjnym wynoszącą ponad 95%.
+                    {t('card3_text')}
                   </p>
                 </div>
               </div>
@@ -485,9 +538,9 @@ export default function App() {
                   <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
                     <Sparkles size={24} />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">Opis z Google Gemini™</h3>
+                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card4_title')}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    Dzięki Gemini API możemy wykorzystać model językowy <strong>Gemini 3.1 Flash Lite</strong>, aby wygenerować edukacyjny i przystępny opis rasy twojego pupila.
+                    {t('card4_text')}
                   </p>
                 </div>
               </div>
@@ -499,33 +552,29 @@ export default function App() {
                 <div className="w-10 h-10 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center border border-gray-200/80 shadow-sm shrink-0">
                   <BookOpen size={20} />
                 </div>
-                <span>Dodatkowe informacje</span>
+                <span>{t('info_section_title')}</span>
               </h3>
               <p className="text-sm text-gray-600 leading-relaxed mb-4">
-                Ta strona została stworzona jako projekt na studia na przedmiot pt. "inteligencja obliczeniowa". Głównym wyzwaniem w projekcie
-                było poprawne wytrenowanie modelu. Zbiór 20.000 zdjęć powodował problemy z overfittingiem. Aby zwalczyć overfitting zastosowałem
-                takie działania jak dropout, obniżanie współczynnika uczenia, augmentacja danych czy zamrażanie warstw niektórych konwulsyjnych modelu.
-                Po eksperymentowaniu z różnymi modelami i konfiguracjami treningowymi w końcu postawiłem na model ConvNeXt-Tiny, który osiągnął
-                najbardziej zadowolone wyniki, z takimi krzywymi uczenia:
+                {t('info_section_text1')}
               </p>
 
               <div className="my-6 max-w-2xl mx-auto rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-white">
                 <img
                   src={learningCurvesImg}
-                  alt="Krzywe uczenia ConvNeXt Finetuned"
+                  alt={t('info_section_image_alt')}
                   className="w-full h-auto object-cover"
                   referrerPolicy="no-referrer"
                 />
               </div>
 
               <p className="text-sm text-gray-600 leading-relaxed">
-                Jak widać problem overfittingu nadal jest widoczny, gdyż model troche lepiej działa na zbiorze testowym niż walidacyjnym. Niemniej jednak, statystyki val acc: 0.9521 i val loss: 0.2018 są zadowalające.
+                {t('info_section_text2')}
               </p>
 
-              <div className="border-t border-gray-100 pt-6 mt-6">
+              <div className="border-t border-gray-100 pt-6 mt-6" id="recognized-breeds">
                 <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Dog size={16} className="text-[#3dcf10]" />
-                  <span>Rozpoznawane rasy psów ({BREEDS.length})</span>
+                  <span>{t('recognized_breeds_title')}</span>
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-xs text-gray-500 bg-gray-50/50 p-4 rounded-2xl border border-gray-100 max-h-72 overflow-y-auto custom-scrollbar">
                   {BREEDS.map((breed, index) => (
@@ -537,22 +586,12 @@ export default function App() {
                 </div>
               </div>
             </div>
-
-            {/* CTA na dole */}
-            <div className="text-center pt-4">
-              <button
-                onClick={() => setPage('home')}
-                className="py-4 px-8 theme-btn-primary font-bold rounded-2xl text-white shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
-              >
-                Wypróbuj klasyfikator rasy
-              </button>
-            </div>
           </motion.main>
         )}
       </AnimatePresence>
 
       <footer className="mt-20 py-8 text-center text-xs theme-text-muted tracking-widest font-bold uppercase">
-        Wojciech Nowak, 2026, DogBreed AI
+        Kuchini, 2026, DogBreed AI
       </footer>
     </div>
   );

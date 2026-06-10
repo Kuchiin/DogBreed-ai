@@ -52,7 +52,7 @@ async function startServer() {
 
   // API Route - Generowanie opisu rasy psa za pomocą Gemini API
   app.post("/api/description", async (req, res) => {
-    const { breed } = req.body;
+    const { breed, lang } = req.body;
     if (!breed) return res.status(400).json({ error: "Nie podano rasy psa" });
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -73,9 +73,14 @@ async function startServer() {
         }
       });
 
+      const isEnglish = lang === 'en';
+      const promptText = isEnglish
+        ? `Write a few interesting, engaging sentences about the dog breed ${breed} in English. List its primary characteristics or fun facts. Use simple markdown formatting (like bold text or bullet points) to make it highly readable.`
+        : `Napisz parę ciekawych, angażujących zdań o psie rasy ${breed} po polsku. Wymień jego główne cechy charakteru lub ciekawostki. Użyj prostego formatowania markdown (np. pogrubienia lub listy punktowej), aby tekst był bardzo czytelny.`;
+
       const response = await ai.models.generateContent({
         model: "gemini-3.1-flash-lite",
-        contents: `napisz parę zdań o psie rasy ${breed}`,
+        contents: promptText,
       });
 
       const text = response.text;
