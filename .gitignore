@@ -9,3 +9,4 @@ coverage/
 !.env.example
 convnext_pytorch_finetuned.pth
 token.txt
+test-pics

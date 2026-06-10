@@ -10,7 +10,7 @@
   --color-card-bg: #FFFFFF;         /* Tło głównego kontenera / kart */
   
   --color-primary: #3dcf10;         /* Główny kolor akcentu (np. przyciski, ikony, zaznaczenie) */
-  --color-primary-hover: #1d4ed8;   /* Kolor akcentu paska/przycisku po najechaniu */
+  --color-primary-hover: #058810;   /* Kolor akcentu paska/przycisku po najechaniu */
   --color-primary-glow: rgba(37, 99, 235, 0.15); /* Subtelna mgiełka wokół akcentu */
   
   --color-text-main: #111827;       /* Podstawowy ciemny kolor tekstu */
@@ -68,25 +68,34 @@
 
 /* Obszar przesyłu zdjęć (Upload Zone) */
 .theme-upload-zone {
-  border: 2px dashed var(--color-border);
-  background-color: var(--color-card-bg);
+  border: 2px dashed rgba(255, 227, 195, 0.4);
+  background-color: var(--color-navbar-bg);
+  color: #ffffff;
   transition: all 0.2s ease-in-out;
+}
+
+.theme-upload-zone .theme-text-muted {
+  color: #ffe3c3;
+  opacity: 0.85;
 }
 
 .theme-upload-zone:hover {
   border-color: var(--color-primary);
-  background-color: var(--color-primary-glow);
+  background-color: #653900; /* slightly lighter warm brown for hover interaction */
 }
 
 .theme-upload-icon-wrapper {
-  background-color: var(--color-page-bg);
-  color: var(--color-text-muted);
+  background-color: #ffffff;
+  color: var(--color-primary);
   transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .theme-upload-zone:hover .theme-upload-icon-wrapper {
-  background-color: var(--color-primary-glow);
+  background-color: #ffffff;
   color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
 }
 
 /* Przyciski */
@@ -146,3 +155,22 @@
 .prose p {
   @apply leading-relaxed mb-4;
 }
+
+/* Custom scrollbar style for lists */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
