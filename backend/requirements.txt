@@ -1,0 +1,8 @@
+# FastApi requirements
+fastapi
+uvicorn
+torch
+torchvision
+pillow
+python-multipart
+numpy

@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* ==========================================
+     KOLORYSTYKA STRONY (Edytuj poniższe wartości, aby szybko zmienić barwy całej witryny!)
+     ========================================== */
+  --color-page-bg: #ffe3c3;         /* Tło całej strony */
+  --color-navbar-bg: #794400;       /* Tło nawigacji */
+  --color-card-bg: #FFFFFF;         /* Tło głównego kontenera / kart */
+  
+  --color-primary: #3dcf10;         /* Główny kolor akcentu (np. przyciski, ikony, zaznaczenie) */
+  --color-primary-hover: #1d4ed8;   /* Kolor akcentu paska/przycisku po najechaniu */
+  --color-primary-glow: rgba(37, 99, 235, 0.15); /* Subtelna mgiełka wokół akcentu */
+  
+  --color-text-main: #111827;       /* Podstawowy ciemny kolor tekstu */
+  --color-text-muted: #8b8b8b;      /* Szary/stonowany tekst pomocniczy */
+  --color-border: #E5E7EB;          /* Kolor obramowań */
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-page-bg);
+    color: var(--color-text-main);
+    @apply antialiased;
+  }
+}
+
+/* ==========================================
+   KLASY SEMANTYCZNE I STYLIZACYJNE FRONTENDU
+   (Całkowicie zdefiniowane w tym pliku, aby łatwo zmieniać design strony)
+   ========================================== */
+
+/* Nawigacja i główne tło */
+.theme-navbar {
+  background-color: var(--color-navbar-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.theme-logo-wrapper {
+  background-color: var(--color-primary);
+  box-shadow: 0 10px 15px -3px var(--color-primary-glow);
+}
+
+.theme-selection-bg::selection {
+  background-color: var(--color-primary-glow);
+}
+
+/* Typografia */
+.theme-title {
+  color: var(--color-text-main);
+}
+
+.theme-subtitle {
+  color: var(--color-text-muted);
+}
+
+/* Karty i sekcje */
+.theme-card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+}
+
+/* Obszar przesyłu zdjęć (Upload Zone) */
+.theme-upload-zone {
+  border: 2px dashed var(--color-border);
+  background-color: var(--color-card-bg);
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-upload-zone:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-glow);
+}
+
+.theme-upload-icon-wrapper {
+  background-color: var(--color-page-bg);
+  color: var(--color-text-muted);
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-upload-zone:hover .theme-upload-icon-wrapper {
+  background-color: var(--color-primary-glow);
+  color: var(--color-primary);
+}
+
+/* Przyciski */
+.theme-btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 10px 15px -3px var(--color-primary-glow);
+}
+
+.theme-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.theme-btn-secondary {
+  border: 2px solid var(--color-border);
+  color: var(--color-text-main);
+  transition: all 0.2s ease-in-out;
+}
+
+.theme-btn-secondary:hover {
+  background-color: var(--color-page-bg);
+  border-color: var(--color-text-muted);
+}
+
+/* Elementy aktywne & Paski postępu */
+.theme-accent-text {
+  color: var(--color-primary);
+}
+
+.theme-accent-bg {
+  background-color: var(--color-primary);
+}
+
+.theme-progress-track {
+  background-color: var(--color-page-bg);
+}
+
+.theme-text-main {
+  color: var(--color-text-main);
+}
+
+.theme-text-muted {
+  color: var(--color-text-muted);
+}
+
+.theme-border {
+  border-color: var(--color-border);
+}
+
+.theme-tag {
+  background-color: var(--color-page-bg);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+}
+
+.prose p {
+  @apply leading-relaxed mb-4;
+}

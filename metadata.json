@@ -1,0 +1,6 @@
+{
+  "name": "DogBreed AI",
+  "description": "Professional dog breed classifier using advanced AI to identify over 120 breeds with high confidence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
