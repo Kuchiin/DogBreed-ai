@@ -1,0 +1,46 @@
+services:
+  # ------------------------------------------------------------------
+  # Python Backend: FastAPI machine learning model server
+  # ------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dogbreed-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # Mount model weights directly from host to avoid massive image size bloat:
+    volumes:
+      - ./convnext_pytorch_finetuned.pth:/app/convnext_pytorch_finetuned.pth
+    healthcheck:
+      # Leverage Python stdlib to query health endpoint without requiring curl/wget in slim image
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ------------------------------------------------------------------
+  # Node.js Frontend: Express proxy, asset server & React application
+  # ------------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dogbreed-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Custom route variable added to resolve backend within the Docker network bridge
+      - MODEL_SERVER_URL=http://backend:8000/predict
+      # Forward the Gemini API Key from host environment for description generation
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      backend:
+         condition: service_healthy
+
+networks:
+  default:
+    name: dogbreed_network

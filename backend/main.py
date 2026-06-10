@@ -3,7 +3,6 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import torch
 import torchvision.transforms as transforms
-# Zmieniamy import ConvNeXt na pełny models
 from torchvision import models 
 from PIL import Image
 import io
@@ -16,7 +15,7 @@ app = FastAPI(title="Dog Breed Classifier - ConvNext")
 IMG_HEIGHT = 300
 IMG_WIDTH = 300
 NUM_CLASSES = 120 
-MODEL_PATH = "convnext_pytorch_finetuned.pth" # Upewnij się, że ścieżka jest poprawna
+MODEL_PATH = "convnext_pytorch_finetuned.pth"
 
 # --- Image Preprocessing (Inference version of your training transforms) ---
 # To jest IDENTYCZNE z val_test_transforms z data_preprocessing.py
@@ -48,12 +47,17 @@ model.classifier = torch.nn.Sequential(
     torch.nn.Linear(512, NUM_CLASSES)
 )
 
+MODEL_LOADED = False
+
 if os.path.exists(MODEL_PATH):
     print(f"Wczytywanie wag z {MODEL_PATH}...")
     try:
         # Load state_dict (weights)
         state_dict = torch.load(MODEL_PATH, map_location=device)
         model.load_state_dict(state_dict)
+        model.to(device)
+        model.eval() # Ustawiamy model w tryb ewaluacji
+        MODEL_LOADED = True
         print("Model wczytany pomyślnie!")
     except Exception as e:
         print(f"Błąd podczas wczytywania wag modelu: {e}")
@@ -62,8 +66,15 @@ else:
     print(f"BŁĄD KRYTYCZNY: Plik wag modelu {MODEL_PATH} nie został znaleziony. Aplikacja nie może działać poprawnie.")
     raise FileNotFoundError(f"Plik wag modelu {MODEL_PATH} nie został znaleziony.")
 
-model.to(device)
-model.eval() # Ustawiamy model w tryb ewaluacji
+@app.get("/health")
+async def health():
+    print("Healthcheck endpoint pinged!")
+    return {
+        "status": "ready" if MODEL_LOADED else "error",
+        "model_file": MODEL_PATH,
+        "exists": os.path.exists(MODEL_PATH),
+        "device": str(device)
+    }
 
 # --- Class Names ---
 # WAŻNE: TA LISTA MUSI BYĆ DOKŁADNIE TAKA SAMA I W TEJ SAMEJ KOLEJNOŚCI, JAK w `class_names` z `data_preprocessing.py`
@@ -85,7 +96,6 @@ BREEDS = ['Chihuahua', 'Japanese Spaniel', 'Maltese Dog', 'Pekinese', 'Tzu', 'Bl
           'Malamute', 'Siberian Husky', 'Affenpinscher', 'Basenji', 'Pug', 'Leonberg', 'Newfoundland', 'Great Pyrenees', 'Samoyed', 
           'Pomeranian', 'Chow', 'Keeshond', 'Brabancon Griffon', 'Pembroke', 'Cardigan', 'Toy Poodle', 'Miniature Poodle', 
           'Standard Poodle', 'Mexican Hairless', 'Dingo', 'Dhole', 'African Hunting Dog']
-
 
 class ImageInput(BaseModel):
     image: str # Base64 encoded image

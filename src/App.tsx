@@ -34,8 +34,18 @@ const BREEDS = [
   'Standard Poodle', 'Mexican Hairless', 'Dingo', 'Dhole', 'African Hunting Dog'
 ];
 
+const getInitialLanguage = (): Language => {
+  if (typeof window !== 'undefined' && window.navigator) {
+    const userLang = (window.navigator.language || (window.navigator as any).userLanguage || '').toLowerCase();
+    if (userLang.startsWith('pl')) {
+      return 'pl';
+    }
+  }
+  return 'en';
+};
+
 export default function App() {
-  const [lang, setLang] = useState<Language>('pl');
+  const [lang, setLang] = useState<Language>(getInitialLanguage());
   const [image, setImage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -181,39 +191,48 @@ export default function App() {
             <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/10">
               <button 
                 onClick={() => handleLanguageChange('pl')} 
-                className={`p-1.5 px-2.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                className={`h-8 w-[64px] sm:w-[70px] rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   lang === 'pl' 
                     ? 'bg-[#3dcf10] text-white shadow-sm font-bold' 
                     : 'hover:bg-white/5 text-white/70 hover:text-white'
                 }`}
                 title="Polska wersja"
               >
-                <span className="text-sm select-none">🇵🇱</span>
-                <span className="text-[10px] font-bold">PL</span>
+                <svg className="w-5 h-3.5 rounded-xs shrink-0 shadow-xs border border-white/20" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="16" height="5" fill="#ffffff" />
+                  <rect y="5" width="16" height="5" fill="#dc143c" />
+                </svg>
+                <span className="text-[11px] font-bold tracking-wider">PL</span>
               </button>
               <button 
                 onClick={() => handleLanguageChange('en')} 
-                className={`p-1.5 px-2.5 rounded-lg flex items-center gap-1 transition-all cursor-pointer ${
+                className={`h-8 w-[64px] sm:w-[70px] rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   lang === 'en' 
                     ? 'bg-[#3dcf10] text-white shadow-sm font-bold' 
                     : 'hover:bg-white/5 text-white/70 hover:text-white'
                 }`}
                 title="English version"
               >
-                <span className="text-sm select-none">🇬🇧</span>
-                <span className="text-[10px] font-bold">EN</span>
+                <svg className="w-5 h-3.5 rounded-xs shrink-0 shadow-xs border border-white/10" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="60" height="30" fill="#012169"/>
+                  <path d="M0,0 L60,30 M60,0 L0,30" stroke="#ffffff" strokeWidth="6"/>
+                  <path d="M0,0 L60,30 M60,0 L0,30" stroke="#C8102E" strokeWidth="2"/>
+                  <path d="M30,0 V30 M0,15 H60" stroke="#ffffff" strokeWidth="10"/>
+                  <path d="M30,0 V30 M0,15 H60" stroke="#C8102E" strokeWidth="6"/>
+                </svg>
+                <span className="text-[11px] font-bold tracking-wider">EN</span>
               </button>
             </div>
 
             <button
               onClick={() => setPage(page === 'home' ? 'info' : 'home')}
-              className={`hover:text-white transition-all cursor-pointer text-sm font-semibold border px-4 py-2 rounded-xl active:scale-95 ${
+              className={`hover:text-white transition-all cursor-pointer text-xs md:text-sm font-semibold border rounded-xl active:scale-95 w-[140px] sm:w-[190px] md:w-[210px] h-10 flex items-center justify-center shrink-0 shadow-xs transition-colors truncate px-2 ${
                 page === 'info'
                   ? 'bg-white/10 border-white text-white shadow-inner font-bold'
                   : 'bg-transparent border-[#ffe3c3]/30 text-[#ffe3c3] hover:border-[#ffe3c3]/80 hover:bg-[#ffe3c3]/5'
               }`}
             >
-              {t('learn_more')}
+              {page === 'info' ? t('back_to_classification') : t('learn_more')}
             </button>
           </div>
         </div>

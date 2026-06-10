@@ -18,7 +18,8 @@ async function startServer() {
     if (!image) return res.status(400).json({ error: "Nie przesłano zdjęcia" });
 
     try {
-      const fastApiResponse = await fetch("http://localhost:8000/predict", {
+      const modelServerUrl = process.env.MODEL_SERVER_URL || "http://localhost:8000/predict";
+      const fastApiResponse = await fetch(modelServerUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image })
