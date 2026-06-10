@@ -8,3 +8,4 @@ coverage/
 .env*
 !.env.example
 convnext_pytorch_finetuned.pth
+token.txt
