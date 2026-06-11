@@ -105,9 +105,48 @@ export default function App() {
     setFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
-      setImage(e.target?.result as string);
-      setResult(null);
-      setError(null);
+      const originalDataUrl = e.target?.result as string;
+      
+      // Tworzymy obiekt Image, aby przeskalować zdjęcie przed wysyłką do Hugging Face.
+      // Zdjęcia z telefonów potrafią ważyć po 10MB+, a nasz model ConvNext potrzebuje tylko 300x300.
+      // Przeskalowanie do max 800px drastycznie zmniejsza wagę przesyłu (do ~150KB) i chroni przed błędami limitu payloadu (413).
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 800;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.85); // 85% jakości w zupełności wystarcza
+          setImage(resizedDataUrl);
+        } else {
+          setImage(originalDataUrl);
+        }
+        setResult(null);
+        setError(null);
+      };
+      img.onerror = () => {
+        setImage(originalDataUrl);
+        setResult(null);
+        setError(null);
+      };
+      img.src = originalDataUrl;
     };
     reader.readAsDataURL(file);
   };
@@ -125,16 +164,62 @@ export default function App() {
     setDescError(null);
     setAiDescription(null);
     try {
-      const response = await fetch("/api/description", {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const isCustomUrl = !!apiUrl;
+      const url = isCustomUrl 
+        ? `${apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl}/description`
+        : "/api/description";
+
+      console.log("Pobieranie opisu z:", url);
+
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ breed: breedName, lang: selectedLang })
       });
+
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || errData.detail || (selectedLang === 'en' ? "Failed to download breed description." : "Nie udało się pobrać opisu rasy."));
+        let errorMessage = selectedLang === 'en' 
+          ? "Failed to download breed description." 
+          : "Nie udało się pobrać opisu rasy.";
+        try {
+          const errData = JSON.parse(responseText);
+          errorMessage = errData.error || errData.detail || errorMessage;
+        } catch (e) {
+          if (responseText.includes("<!DOCTYPE") || responseText.includes("<html")) {
+            errorMessage = selectedLang === 'en'
+              ? "The API returned an HTML page. Ensure GEMINI_API_KEY is configured in your Hugging Face Space settings (Settings -> Variables and Secrets)."
+              : "API zwróciło stronę HTML. Upewnij się, że dodałeś klucz GEMINI_API_KEY w ustawieniach (Settings -> Variables and Secrets) swojego Hugging Face Space.";
+          } else if (responseText.trim()) {
+            errorMessage = responseText.slice(0, 150);
+          }
+        }
+        throw new Error(errorMessage);
       }
-      const data = await response.json();
+
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch (err) {
+        if (!responseText.trim()) {
+          throw new Error(selectedLang === 'en'
+            ? "Server returned an empty response. Make sure GEMINI_API_KEY is added to Hugging Face Workspace Secrets."
+            : "Serwer zwrócił pustą odpowiedź. Upewnij się, że dodałeś klucz GEMINI_API_KEY w ustawieniach (Variables and Secrets) Hugging Face Space.");
+        }
+        if (responseText.includes("<!DOCTYPE") || responseText.includes("<html")) {
+          throw new Error(selectedLang === 'en'
+            ? "Server returned HTML instead of JSON. Check your Space configuration."
+            : "Serwer zwrócił kod HTML zamiast JSON. Sprawdź konfigurację API i Hugging Face Space.");
+        }
+        throw new Error(`Błąd parsowania odpowiedzi JSON: ${responseText.slice(0, 100)}`);
+      }
+
+      if (!data || !data.description) {
+        throw new Error(selectedLang === 'en' ? "Empty description structure returned." : "Model zwrócił pusty lub niekompletny opis.");
+      }
+
       setAiDescription(data.description);
     } catch (err) {
       console.error(err);
