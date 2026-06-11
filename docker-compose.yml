@@ -9,13 +9,15 @@ services:
     container_name: dogbreed-backend
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "7860:7860"
+    environment:
+      - PORT=7860
     # Mount model weights directly from host to avoid massive image size bloat:
     volumes:
       - ./backend/convnext_pytorch_finetuned.pth:/app/convnext_pytorch_finetuned.pth
     healthcheck:
       # Leverage Python stdlib to query health endpoint without requiring curl/wget in slim image
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:7860/health')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,7 +36,7 @@ services:
       - "3000:3000"
     environment:
       # Custom route variable added to resolve backend within the Docker network bridge
-      - MODEL_SERVER_URL=http://backend:8000/predict
+      - MODEL_SERVER_URL=http://backend:7860/predict
       # Forward the Gemini API Key from host environment for description generation
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:

@@ -82,6 +82,15 @@ else:
     print(f"BŁĄD KRYTYCZNY: Plik wag modelu {MODEL_PATH} nie został znaleziony. Aplikacja nie może działać poprawnie.")
     raise FileNotFoundError(f"Plik wag modelu {MODEL_PATH} nie został znaleziony.")
 
+@app.get("/")
+async def root():
+    return {
+        "status": "online",
+        "message": "Dog Breed Classifier API (ConvNext) is running successfully!",
+        "version": "1.0.0",
+        "endpoints": ["/health", "/predict", "/description"]
+    }
+
 @app.get("/health")
 async def health():
     print("Healthcheck endpoint pinged!")
@@ -199,6 +208,6 @@ async def description(data: DescriptionInput):
         raise HTTPException(status_code=500, detail=f"Błąd połączenia z Gemini: {str(e)}")
 
 if __name__ == "__main__":
-    # Hugging Face Spaces passes the port via the PORT environment variable (usually 7860)
-    port = int(os.environ.get("PORT", 8000))
+    # Hugging Face Spaces passes the port via the PORT environment variable (defaults to 7860)
+    port = int(os.environ.get("PORT", 7860))
     uvicorn.run(app, host="0.0.0.0", port=port)

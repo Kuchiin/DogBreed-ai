@@ -18,7 +18,7 @@ async function startServer() {
     if (!image) return res.status(400).json({ error: "Nie przesłano zdjęcia" });
 
     try {
-      const modelServerUrl = process.env.MODEL_SERVER_URL || "http://localhost:8000/predict";
+      const modelServerUrl = process.env.MODEL_SERVER_URL || "http://localhost:7860/predict";
       const fastApiResponse = await fetch(modelServerUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,7 +46,7 @@ async function startServer() {
       console.error("FastAPI unreachable:", e);
       res.status(503).json({ 
         error: "Model Offline", 
-        detail: "Nie można połączyć się z serwerem FastAPI na porcie 8000. Uruchom 'python backend/main.py'." 
+        detail: "Nie można połączyć się z serwerem FastAPI na porcie 7860. Uruchom 'python backend/main.py'." 
       });
     }
   });

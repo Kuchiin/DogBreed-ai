@@ -24,8 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend files (including the main.py script and local checkpoint weights if present)
 COPY . .
 
-# Expose the FastAPI port
-EXPOSE 8000
+# Expose the FastAPI port (7860 is required by Hugging Face Spaces)
+EXPOSE 7860
 
 # Start the application using python main.py
 CMD ["python", "main.py"]
