@@ -22,7 +22,7 @@
     "desc_error_default": "Błąd podczas generowania opisu przez Gemini.",
     "warning_confidence": "Uwaga, confidence level spadł poniżej 75%, może to oznaczać że nasz model błędnie zaklasyfikował twojego pupila, wskazując inną, podobną wizualnie rasę.",
     "col1_title": "Jak to działa?",
-    "col1_text": "Nasz system wykorzystuje zaawansowany model splotowy (ConvNext) trenowany na ponad 20.000 zdjęć psów, aby zapewnić najwyższą precyzję rozpoznawania.",
+    "col1_text": "Nasz system wykorzystuje zaawansowany model splotowy (ConvNext) trenowany na zbiorze ponad 20.000 zdjęć psów, aby zapewnić najwyższą precyzję rozpoznawania.",
     "col2_title": "120 Ras",
     "col2_text_before_btn": "Nasz model jest w stanie rozpoznać 120 różnych ras psów, od popularnych po te bardziej egzotyczne. Jeżeli rasy twojego psa nie ma w naszej bazie, model wskaże rasę którą uzna za najbardziej podobną, a wskaźnik confidence odpowiednio się obniży. Kompletną listę wszystkich ras które rozpoznaje nasz model znajdziesz w sekcji ",
     "col3_title": "Prywatność",
@@ -38,7 +38,7 @@
     "card4_title": "Opis z Google Gemini™",
     "card4_text": "Dzięki Gemini API możemy wykorzystać model językowy Gemini 3.1 Flash Lite, aby wygenerować edukacyjny i przystępny opis rasy tego pupila.",
     "info_section_title": "Dodatkowe informacje",
-    "info_section_text1": "Ta strona została stworzona jako projekt na studia na przedmiot pt. \"inteligencja obliczeniowa\". Głównym wyzwaniem w projekcie było poprawne wytrenowanie modelu. Zbiór 20.000 zdjęć powodował problemy z overfittingiem. Aby zwalczyć overfitting zastosowałem takie działania jak dropout, obniżanie współczynnika uczenia, augmentacja danych czy zamrażanie warstw niektórych komwulsyjnych modelu. Po eksperymentowaniu z różnymi modelami i konfiguracjami treningowymi w końcu postawiłem na model ConvNeXt-Tiny, który osiągnął najbardziej zadowolone wyniki, z takimi krzywymi uczenia:",
+    "info_section_text1": "Ta strona została stworzona jako projekt na studia na przedmiot pt. \"inteligencja obliczeniowa\". Głównym wyzwaniem w projekcie było poprawne wytrenowanie modelu. Zbiór 20.000 zdjęć powodował problemy z overfittingiem. Aby zwalczyć overfitting zastosowałem takie działania jak dropout, obniżanie współczynnika uczenia, augmentacja danych czy zamrażanie niektórych warstw komwulsyjnych modelu. Po eksperymentowaniu z różnymi modelami i konfiguracjami treningowymi w końcu postawiłem na model ConvNeXt-Tiny, który osiągnął najbardziej zadowolone wyniki, z takimi krzywymi uczenia:",
     "info_section_image_alt": "Krzywe uczenia ConvNeXt Finetuned",
     "info_section_text2": "Jak widać problem overfittingu nadal jest widoczny, gdyż model troche lepiej działa na zbiorze treningowym niż walidacyjnym. Niemniej jednak, statystyki val acc: 0.9521 i val loss: 0.2018 są zadowalające.",
     "recognized_breeds_title": "Rasy psów rozpoznawane przez nasz model"
