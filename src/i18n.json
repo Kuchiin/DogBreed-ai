@@ -40,7 +40,7 @@
     "info_section_title": "Dodatkowe informacje",
     "info_section_text1": "Ta strona została stworzona jako projekt na studia na przedmiot pt. \"inteligencja obliczeniowa\". Głównym wyzwaniem w projekcie było poprawne wytrenowanie modelu. Zbiór 20.000 zdjęć powodował problemy z overfittingiem. Aby zwalczyć overfitting zastosowałem takie działania jak dropout, obniżanie współczynnika uczenia, augmentacja danych czy zamrażanie warstw niektórych komwulsyjnych modelu. Po eksperymentowaniu z różnymi modelami i konfiguracjami treningowymi w końcu postawiłem na model ConvNeXt-Tiny, który osiągnął najbardziej zadowolone wyniki, z takimi krzywymi uczenia:",
     "info_section_image_alt": "Krzywe uczenia ConvNeXt Finetuned",
-    "info_section_text2": "Jak widać problem overfittingu nadal jest widoczny, gdyż model troche lepiej działa na zbiorze testowym niż walidacyjnym. Niemniej jednak, statystyki val acc: 0.9521 i val loss: 0.2018 są zadowalające.",
+    "info_section_text2": "Jak widać problem overfittingu nadal jest widoczny, gdyż model troche lepiej działa na zbiorze treningowym niż walidacyjnym. Niemniej jednak, statystyki val acc: 0.9521 i val loss: 0.2018 są zadowalające.",
     "recognized_breeds_title": "Rasy psów rozpoznawane przez nasz model"
   },
   "en": {
@@ -84,7 +84,7 @@
     "info_section_title": "Additional Information",
     "info_section_text1": "This website was developed as an academic project for a course titled \"Computational Intelligence\". The main challenge in the project was training the model correctly. The dataset of 20,000 photos caused severe overfitting issues. To combat overfitting, I applied techniques such as dropout, learning rate factor reduction, data augmentation, and freezing specific convolutional layers of the model. After experimenting with various models and training configurations, I ultimately selected the ConvNeXt-Tiny model, which yielded the most satisfying results with the following learning curves:",
     "info_section_image_alt": "ConvNeXt Finetuned learning curves",
-    "info_section_text2": "As can be seen, the overfitting issue is still visible, with the model performing slightly better on the test set than the validation set. Nonetheless, the statistics of val acc: 0.9521 and val loss: 0.2018 are highly satisfactory.",
+    "info_section_text2": "As can be seen, the overfitting issue is still visible, with the model performing slightly better on the train set than the validation set. Nonetheless, the statistics of val acc: 0.9521 and val loss: 0.2018 are highly satisfactory.",
     "recognized_breeds_title": "Dog breeds recognized by our model"
   }
 }

@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import torch
 import torchvision.transforms as transforms
@@ -8,14 +9,29 @@ from PIL import Image
 import io
 import base64
 import os
+import json
+import urllib.request
+import urllib.error
 
 app = FastAPI(title="Dog Breed Classifier - ConvNext")
+
+# Włączamy CORS, aby nasza aplikacja kliencka (np. na Netlify) mogła wysyłać zapytania bezpośrednio do Hugging Face Spaces
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- Constants from training ---
 IMG_HEIGHT = 300
 IMG_WIDTH = 300
 NUM_CLASSES = 120 
-MODEL_PATH = "convnext_pytorch_finetuned.pth"
+
+# Dynamic path resolution to find the model weight file where 'main.py' is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "convnext_pytorch_finetuned.pth")
 
 # --- Image Preprocessing (Inference version of your training transforms) ---
 # To jest IDENTYCZNE z val_test_transforms z data_preprocessing.py
@@ -133,5 +149,56 @@ async def predict(data: ImageInput):
         print(f"Inference error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+class DescriptionInput(BaseModel):
+    breed: str
+    lang: str = "pl"
+
+@app.post("/description")
+async def description(data: DescriptionInput):
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=400,
+            detail="Brak klucza API Gemini na serwerze (GEMINI_API_KEY). Skonfiguruj go w ustawieniach Hugging Face."
+        )
+
+    is_english = data.lang == "en"
+    if is_english:
+        prompt_text = f"Write a few interesting, engaging sentences about the dog breed {data.breed} in English. List its primary characteristics or fun facts. Use simple markdown formatting (like bold text or bullet points) to make it highly readable."
+    else:
+        prompt_text = f"Napisz parę ciekawych, angażujących zdań o psie rasy {data.breed} po polsku. Wymień jego główne cechy charakteru lub ciekawostki. Użyj prostego formatowania markdown (np. pogrubienia lub listy punktowej), aby tekst był bardzo czytelny."
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    
+    req_data = {
+        "contents": [{
+            "parts": [{"text": prompt_text}]
+        }]
+    }
+    
+    req_body = json.dumps(req_data).encode("utf-8")
+    req_headers = {"Content-Type": "application/json", "User-Agent": "aistudio-build"}
+    req = urllib.request.Request(url, data=req_body, headers=req_headers, method="POST")
+    
+    try:
+        with urllib.request.urlopen(req, timeout=10) as response:
+            res_body = response.read().decode("utf-8")
+            res_data = json.loads(res_body)
+            try:
+                text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                return {"description": text}
+            except (KeyError, IndexError):
+                print(f"Błąd struktury odpowiedzi Gemini: {res_data}")
+                raise HTTPException(status_code=502, detail="Nietypowa odpowiedź z API Gemini.")
+    except urllib.error.HTTPError as e:
+        error_msg = e.read().decode("utf-8")
+        print(f"HTTPError gemini: {error_msg}")
+        raise HTTPException(status_code=500, detail=f"Błąd API Gemini: {error_msg}")
+    except Exception as e:
+        print(f"Exception gemini: {e}")
+        raise HTTPException(status_code=500, detail=f"Błąd połączenia z Gemini: {str(e)}")
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Hugging Face Spaces passes the port via the PORT environment variable (usually 7860)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

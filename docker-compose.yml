@@ -12,7 +12,7 @@ services:
       - "8000:8000"
     # Mount model weights directly from host to avoid massive image size bloat:
     volumes:
-      - ./convnext_pytorch_finetuned.pth:/app/convnext_pytorch_finetuned.pth
+      - ./backend/convnext_pytorch_finetuned.pth:/app/convnext_pytorch_finetuned.pth
     healthcheck:
       # Leverage Python stdlib to query health endpoint without requiring curl/wget in slim image
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
