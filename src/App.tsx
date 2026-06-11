@@ -263,17 +263,43 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans theme-text-main theme-selection-bg pb-20">
       {/* Header */}
-      <nav className="p-6 sticky top-0 z-10 theme-navbar shadow-sm text-white">
-        <div className="max-w-4xl mx-auto flex items-center justify-between font-medium">
-          <div className="flex items-center gap-2 cursor-pointer group" onClick={handleLogoClick}>
-            <div className="w-10 h-10 theme-logo-wrapper rounded-xl flex items-center justify-center text-white transition-all group-hover:scale-105">
-              <Dog size={24} />
+      <nav className="px-4 py-3 sm:py-5 sm:px-6 sticky top-0 z-10 theme-navbar shadow-sm text-white select-none">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4 font-medium">
+          <div className="flex items-center justify-between w-full md:w-auto">
+            <div className="flex items-center gap-2 cursor-pointer group" onClick={handleLogoClick}>
+              <div className="w-9 h-9 sm:w-10 sm:h-10 theme-logo-wrapper rounded-xl flex items-center justify-center text-white transition-all group-hover:scale-105">
+                <Dog size={22} className="sm:w-[24px] sm:h-[24px]" />
+              </div>
+              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white group-hover:opacity-90 transition-opacity">DogBreed AI</h1>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-white group-hover:opacity-90 transition-opacity">DogBreed AI</h1>
+            {/* Tylko przełącznik języków widoczny obok logo na małych ekranach, by zaoszczędzić miejsce */}
+            <div className="flex md:hidden items-center gap-1 bg-white/10 p-0.5 rounded-lg border border-white/10 scale-90 sm:scale-100">
+              <button 
+                onClick={() => handleLanguageChange('pl')} 
+                className={`h-7 px-2 rounded-md flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                  lang === 'pl' 
+                    ? 'bg-[#3dcf10] text-white shadow-sm font-bold' 
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                <span className="text-[10px] font-bold tracking-wider">PL</span>
+              </button>
+              <button 
+                onClick={() => handleLanguageChange('en')} 
+                className={`h-7 px-2 rounded-md flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                  lang === 'en' 
+                    ? 'bg-[#3dcf10] text-white shadow-sm font-bold' 
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                <span className="text-[10px] font-bold tracking-wider">EN</span>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            {/* Przełącznik Języka / Language switcher */}
-            <div className="flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/10">
+          
+          <div className="flex items-center justify-between md:justify-end gap-3 text-sm w-full md:w-auto">
+            {/* Przełącznik Języka dla średnich/dużych ekranów */}
+            <div className="hidden md:flex items-center gap-1 bg-white/10 p-1 rounded-xl border border-white/10">
               <button 
                 onClick={() => handleLanguageChange('pl')} 
                 className={`h-8 w-[64px] sm:w-[70px] rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
@@ -311,13 +337,14 @@ export default function App() {
 
             <button
               onClick={() => setPage(page === 'home' ? 'info' : 'home')}
-              className={`hover:text-white transition-all cursor-pointer text-xs md:text-sm font-semibold border rounded-xl active:scale-95 w-[140px] sm:w-[190px] md:w-[210px] h-10 flex items-center justify-center shrink-0 shadow-xs transition-colors truncate px-2 ${
+              className={`hover:text-white transition-all cursor-pointer text-xs md:text-sm font-semibold border rounded-xl active:scale-95 w-full md:w-auto md:min-w-[190px] h-10 flex items-center justify-center shrink-0 shadow-xs transition-colors truncate px-4 ${
                 page === 'info'
                   ? 'bg-white/10 border-white text-white shadow-inner font-bold'
                   : 'bg-transparent border-[#ffe3c3]/30 text-[#ffe3c3] hover:border-[#ffe3c3]/80 hover:bg-[#ffe3c3]/5'
               }`}
             >
-              {page === 'info' ? t('back_to_classification') : t('learn_more')}
+              <span className="hidden sm:inline">{page === 'info' ? t('back_to_classification') : t('learn_more')}</span>
+              <span className="sm:hidden">{page === 'info' ? t('back_to_main') : t('learn_more')}</span>
             </button>
           </div>
         </div>
@@ -331,13 +358,13 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="max-w-4xl mx-auto mt-12 px-6"
+            className="max-w-4xl mx-auto mt-6 xs:mt-10 sm:mt-12 px-4 sm:px-6"
           >
-            <header className="mb-12 text-center">
+            <header className="mb-6 xs:mb-8 sm:mb-12 text-center">
               <motion.h2 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-4xl md:text-5xl font-bold tracking-tight mb-4"
+                className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-2 sm:mb-4"
               >
                 {t('hero_title')}
               </motion.h2>
@@ -345,7 +372,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-lg theme-text-muted max-w-xl mx-auto"
+                className="text-xs xs:text-sm sm:text-base md:text-lg theme-text-muted max-w-xl mx-auto px-1 sm:px-0 leading-relaxed"
               >
                 {t('hero_subtitle')}
               </motion.p>
@@ -361,7 +388,7 @@ export default function App() {
                     exit={{ opacity: 0, scale: 0.95 }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={onDrop}
-                    className="relative group theme-upload-zone rounded-3xl p-12 text-center cursor-pointer"
+                    className="relative group theme-upload-zone rounded-3xl p-6 xs:p-8 sm:p-12 text-center cursor-pointer"
                   >
                     <input
                       type="file"
@@ -369,16 +396,16 @@ export default function App() {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       accept="image/*"
                     />
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 theme-upload-icon-wrapper rounded-full flex items-center justify-center">
-                        <Upload size={32} className="transition-colors" />
+                    <div className="flex flex-col items-center gap-3 sm:gap-4">
+                      <div className="w-14 h-14 sm:w-20 sm:h-20 theme-upload-icon-wrapper rounded-full flex items-center justify-center">
+                        <Upload className="w-6 h-6 sm:w-8 sm:h-8 transition-colors" />
                       </div>
                       <div>
-                        <p className="text-xl font-semibold mb-1 text-white">{t('drop_title')}</p>
-                        <p className="theme-text-muted">{t('drop_subtitle')}</p>
+                        <p className="text-lg sm:text-xl font-bold mb-1 text-white">{t('drop_title')}</p>
+                        <p className="text-xs sm:text-sm theme-text-muted px-2">{t('drop_subtitle')}</p>
                       </div>
-                      <div className="mt-4 flex gap-8 text-xs theme-text-muted">
-                        <div className="flex items-center gap-1"><Camera size={14} /> JPG, PNG</div>
+                      <div className="mt-2 flex gap-4 text-[11px] sm:text-xs theme-text-muted">
+                        <div className="flex items-center gap-1"><Camera size={13} /> JPG, PNG</div>
                       </div>
                     </div>
                   </motion.div>
@@ -401,11 +428,11 @@ export default function App() {
                       )}
                     </div>
 
-                    <div className="p-8">
+                    <div className="p-4 xs:p-6 sm:p-8">
                       {error && (
                         <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-3 border border-red-100">
                           <AlertCircle size={20} />
-                          <p className="text-sm font-medium">{error}</p>
+                          <p className="text-xs sm:text-sm font-medium">{error}</p>
                         </div>
                       )}
 
@@ -414,23 +441,23 @@ export default function App() {
                           <button
                             disabled={isAnalyzing}
                             onClick={analyzeBreed}
-                            className="w-full py-4 theme-btn-primary disabled:opacity-50 text-white font-bold rounded-2xl flex items-center justify-center gap-2 text-lg"
+                            className="w-full py-3 sm:py-4 theme-btn-primary disabled:opacity-50 text-white font-bold rounded-2xl flex items-center justify-center gap-2 text-base sm:text-lg cursor-pointer"
                           >
                             {isAnalyzing ? (
                               <>
-                                <RefreshCw size={24} className="animate-spin" />
+                                <RefreshCw size={20} className="animate-spin" />
                                 {t('btn_analyzing')}
                               </>
                             ) : (
                               <>
-                                <RefreshCw size={24} />
+                                <RefreshCw size={20} />
                                 {t('btn_identify')}
                               </>
                             )}
                           </button>
                           <button 
                             onClick={reset} 
-                            className="text-sm theme-text-muted hover:theme-text-main transition-colors underline underline-offset-4"
+                            className="text-xs sm:text-sm theme-text-muted hover:theme-text-main transition-colors underline underline-offset-4 cursor-pointer"
                           >
                             {t('btn_choose_another')}
                           </button>
@@ -439,19 +466,19 @@ export default function App() {
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="space-y-8"
+                          className="space-y-6 sm:space-y-8"
                         >
                           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b theme-border pb-6">
-                            <div>
-                              <p className="text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">{t('likely_breed')}</p>
-                              <h3 className="text-4xl font-black theme-text-main leading-tight">
+                            <div className="min-w-0">
+                              <p className="text-[10px] sm:text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">{t('likely_breed')}</p>
+                              <h3 className="text-2xl xs:text-3xl sm:text-4xl font-black theme-text-main leading-tight truncate-none break-words">
                                 {result.breed}
                               </h3>
                             </div>
-                            <div className="flex flex-col md:items-end">
-                              <p className="text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">{t('confidence')}</p>
+                            <div className="flex flex-col md:items-end shrink-0">
+                              <p className="text-[10px] sm:text-xs uppercase tracking-widest theme-text-muted font-bold mb-1">{t('confidence')}</p>
                               <div className="flex items-center gap-2">
-                                 <div className="text-3xl font-mono theme-accent-text font-bold">
+                                 <div className="text-2xl sm:text-3xl font-mono theme-accent-text font-bold">
                                    {result.confidence}%
                                  </div>
                                  <div className="w-16 h-2 theme-progress-track rounded-full overflow-hidden">
@@ -470,18 +497,18 @@ export default function App() {
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.95 }}
-                              className="p-5 bg-red-50 border border-red-100 text-red-800 rounded-2xl flex items-start gap-3.5 relative overflow-hidden"
+                              className="p-4 xs:p-5 bg-red-50 border border-red-100 text-red-800 rounded-2xl flex items-start gap-3 relative overflow-hidden"
                             >
-                              <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
-                              <div className="text-sm leading-relaxed pr-8 font-medium">
+                              <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={18} />
+                              <div className="text-xs sm:text-sm leading-relaxed pr-6 font-medium">
                                 {t('warning_confidence')}
                               </div>
                               <button
                                 onClick={() => setShowWarning(false)}
-                                className="absolute top-4 right-4 text-red-400 hover:text-red-700 transition-colors cursor-pointer"
+                                className="absolute top-3.5 right-3 text-red-400 hover:text-red-700 transition-colors cursor-pointer"
                                 aria-label="Zamknij"
                               >
-                                <X size={18} />
+                                <X size={16} />
                               </button>
                             </motion.div>
                           )}
@@ -523,7 +550,7 @@ export default function App() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
-                                className="bg-gray-50/50 p-5 rounded-2xl border theme-border theme-text-main text-sm leading-relaxed"
+                                className="bg-gray-50/50 p-4 xs:p-5 rounded-2xl border theme-border theme-text-main text-xs sm:text-sm leading-relaxed"
                               >
                                 <div className="markdown-body">
                                   <Markdown>{aiDescription}</Markdown>
@@ -535,7 +562,7 @@ export default function App() {
                           <div className="pt-4">
                             <button
                               onClick={reset}
-                              className="w-full py-4 theme-btn-secondary font-bold rounded-2xl flex items-center justify-center gap-2"
+                              className="w-full py-3 sm:py-4 theme-btn-secondary font-bold rounded-2xl flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
                             >
                               {t('btn_start_over')}
                             </button>
@@ -549,8 +576,8 @@ export default function App() {
             </section>
 
             {/* Info Footer */}
-            <section className="mt-20 border-t theme-border pt-12 pb-12">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+            <section className="mt-12 sm:mt-16 lg:mt-20 border-t theme-border pt-12 pb-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left text-gray-900">
                 <div>
                   <h5 className="font-bold mb-3">{t('col1_title')}</h5>
                   <p className="text-sm theme-text-muted leading-relaxed">
@@ -579,90 +606,90 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}
-            className="max-w-4xl mx-auto mt-12 px-6"
+            className="max-w-4xl mx-auto mt-6 xs:mt-10 sm:mt-12 px-4 sm:px-6"
           >
             {/* Przycisk wstecz */}
             <button
               onClick={() => setPage('home')}
-              className="mb-8 flex items-center gap-2 text-sm text-[#794400] hover:opacity-85 transition-opacity font-bold cursor-pointer"
+              className="mb-4 sm:mb-8 flex items-center gap-2 text-xs sm:text-sm text-[#794400] hover:opacity-85 transition-opacity font-bold cursor-pointer"
             >
-              <ArrowLeft size={16} /> {t('back_to_classification')}
+              <ArrowLeft size={14} className="sm:w-[16px] sm:h-[16px]" /> {t('back_to_classification')}
             </button>
 
             {/* Hero Sekcja w tym samym stylu */}
-            <header className="mb-12 text-center">
-              <span className="text-xs uppercase tracking-widest text-[#794400] bg-[#794400]/10 px-3 py-1 rounded-full font-extrabold mb-3 inline-block">
+            <header className="mb-6 sm:mb-10 lg:mb-12 text-center">
+              <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[#794400] bg-[#794400]/10 px-2.5 py-1 rounded-full font-extrabold mb-2 sm:mb-3 inline-block">
                 {t('info_head_badge')}
               </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#111827]">
+              <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-2 sm:mb-4 text-[#111827]">
                 {t('info_head_title')}
               </h2>
             </header>
 
             {/* Bento-grid stylizowanych kart */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-              <div className="theme-card p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
+              <div className="theme-card p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
-                    <Cpu size={24} />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-3 sm:mb-4 border border-gray-200/80 shadow-sm">
+                    <Cpu size={20} className="sm:w-[24px] sm:h-[24px]" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card1_title')}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {t('card1_text')}
+                  <h3 className="text-lg sm:text-xl font-bold mb-1.5 text-[#111827]">{t('card1_title')}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                     {t('card1_text')}
                   </p>
                 </div>
               </div>
 
-              <div className="theme-card p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="theme-card p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
-                    <Layers size={24} />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-3 sm:mb-4 border border-gray-200/80 shadow-sm">
+                    <Layers size={20} className="sm:w-[24px] sm:h-[24px]" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card2_title')}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {t('card2_text')}
+                  <h3 className="text-lg sm:text-xl font-bold mb-1.5 text-[#111827]">{t('card2_title')}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                     {t('card2_text')}
                   </p>
                 </div>
               </div>
 
-              <div className="theme-card p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="theme-card p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
-                    <Award size={24} />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-3 sm:mb-4 border border-gray-200/80 shadow-sm">
+                    <Award size={20} className="sm:w-[24px] sm:h-[24px]" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card3_title')}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {t('card3_text')}
+                  <h3 className="text-lg sm:text-xl font-bold mb-1.5 text-[#111827]">{t('card3_title')}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                     {t('card3_text')}
                   </p>
                 </div>
               </div>
 
-              <div className="theme-card p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
+              <div className="theme-card p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="w-12 h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-4 border border-gray-200/80 shadow-sm">
-                    <Sparkles size={24} />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center mb-3 sm:mb-4 border border-gray-200/80 shadow-sm">
+                    <Sparkles size={20} className="sm:w-[24px] sm:h-[24px]" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-[#111827]">{t('card4_title')}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {t('card4_text')}
+                  <h3 className="text-lg sm:text-xl font-bold mb-1.5 text-[#111827]">{t('card4_title')}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                     {t('card4_text')}
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Duża sekcja dla użytkownika do wpisania dalszych danych */}
-            <div className="theme-card p-8 rounded-3xl border border-gray-100 shadow-sm mb-12 text-left">
-              <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-[#111827]">
-                <div className="w-10 h-10 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center border border-gray-200/80 shadow-sm shrink-0">
-                  <BookOpen size={20} />
+            <div className="theme-card p-4 xs:p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm mb-12 text-left">
+              <h3 className="text-xl sm:text-2xl font-extrabold mb-4 flex items-center gap-2 sm:gap-3 text-[#111827]">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white text-[#3dcf10] rounded-xl flex items-center justify-center border border-gray-200/80 shadow-sm shrink-0">
+                  <BookOpen size={18} className="sm:w-[20px] sm:h-[20px]" />
                 </div>
                 <span>{t('info_section_title')}</span>
               </h3>
-              <p className="text-sm text-gray-600 leading-relaxed mb-4">
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4">
                 {t('info_section_text1')}
               </p>
 
-              <div className="my-6 max-w-2xl mx-auto rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+              <div className="my-6 max-w-2xl mx-auto rounded-xl sm:rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-white">
                 <img
                   src={learningCurvesImg}
                   alt={t('info_section_image_alt')}
@@ -671,16 +698,16 @@ export default function App() {
                 />
               </div>
 
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
                 {t('info_section_text2')}
               </p>
 
               <div className="border-t border-gray-100 pt-6 mt-6" id="recognized-breeds">
-                <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Dog size={16} className="text-[#3dcf10]" />
+                <h4 className="text-xs sm:text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <Dog size={15} className="text-[#3dcf10] sm:w-[16px] sm:h-[16px]" />
                   <span>{t('recognized_breeds_title')}</span>
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-xs text-gray-500 bg-gray-50/50 p-4 rounded-2xl border border-gray-100 max-h-72 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-xs text-gray-500 bg-gray-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 max-h-72 overflow-y-auto custom-scrollbar">
                   {BREEDS.map((breed, index) => (
                     <div key={index} className="flex items-center gap-2 hover:text-[#3dcf10] transition-colors py-0.5" id={`breed-${index}`}>
                       <span className="font-mono text-[10px] text-gray-400 w-5 inline-block text-right">{index + 1}.</span>
