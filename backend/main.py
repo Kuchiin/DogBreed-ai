@@ -177,7 +177,7 @@ async def description(data: DescriptionInput):
     else:
         prompt_text = f"Napisz parę ciekawych, angażujących zdań o psie rasy {data.breed} po polsku. Wymień jego główne cechy charakteru lub ciekawostki. Użyj prostego formatowania markdown (np. pogrubienia lub listy punktowej), aby tekst był bardzo czytelny."
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
     
     req_data = {
         "contents": [{
