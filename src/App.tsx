@@ -722,7 +722,7 @@ export default function App() {
       </AnimatePresence>
 
       <footer className="mt-20 py-8 text-center text-xs theme-text-muted tracking-widest font-bold uppercase">
-        Kuchini, 2026, DogBreed AI
+        Wojciech Nowak, 2026, DogBreed AI
       </footer>
     </div>
   );
