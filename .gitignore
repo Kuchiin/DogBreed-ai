@@ -10,3 +10,4 @@ coverage/
 convnext_pytorch_finetuned.pth
 token.txt
 test-pics
+Images_of_dogs/
